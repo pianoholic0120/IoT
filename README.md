@@ -2,7 +2,7 @@
 
     source ./final/bin/activate
 
-# Converting Garmin FIT to CSV (and GPX to CSV)
+# Converting Garmin FIT to CSV 
 
 First, install `fitparse`
 
