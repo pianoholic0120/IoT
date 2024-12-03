@@ -1,0 +1,7 @@
+ant_device_number,ant_network,ant_transmission_type,battery_status,battery_voltage,cum_operating_time,device_index,device_type,garmin_product,hardware_version,manufacturer,number,product,sensor_position,serial_number,software_version,source_type,time_created,timestamp,type,unknown_0,unknown_1,unknown_10,unknown_11,unknown_12,unknown_13,unknown_14,unknown_15,unknown_16,unknown_17,unknown_18,unknown_19,unknown_2,unknown_20,unknown_21,unknown_22,unknown_23,unknown_24,unknown_25,unknown_253,unknown_254,unknown_29,unknown_3,unknown_30,unknown_31,unknown_32,unknown_4,unknown_5,unknown_6,unknown_7,unknown_8,unknown_9
+,,,,,,,,4063,,garmin,11,,,3488215908,,,2024-11-30 04:09:05,,44,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,325,,,,,,,,,,,,,,,,,vívosmart 5,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,4063,,3488215908,3.25,,,2024-11-30 04:09:05,,,,,,,,,,,,,,,,,,,,,,,"(None, None, None, None, None, None)",,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,1101902945,0,,,,,,,,,,,,,,,,,,1101874145,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,0,1101874145,,,,,,,,,,,86,,,,,,,,,,1101902945,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,52,100,480,1101871800,480,,0,79,77,4,98,-38,86,88,105,-4,91,17,86,1101871800,,,962,,,,-60,469674,49441452,3492819,1101900600,1101843780
