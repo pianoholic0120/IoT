@@ -1,3 +1,7 @@
+# Virtual Environment
+
+    source ./final/bin/activate
+
 # Converting Garmin FIT to CSV (and GPX to CSV)
 
 [article for original version](https://maxcandocia.com/article/2017/Sep/22/converting-garmin-fit-to-csv/)
