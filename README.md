@@ -6,10 +6,6 @@
 
 First, install `fitparse`
 
-    sudo pip3 install -e git+https://github.com/dtcooper/python-fitparse#egg=python-fitparse
-
-OR
-
     sudo pip3 install fitparse
 
 Then you can execute 
