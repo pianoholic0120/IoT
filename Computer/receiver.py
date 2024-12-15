@@ -1,8 +1,8 @@
 import paho.mqtt.client as mqtt
 
 # MQTT settings
-broker_address = "localhost"  # Replace with broker's IP or hostname
-topic = "air_quality/latest"  # Topic to subscribe to
+broker_address = "172.20.10.2"  # Replace with broker's IP or hostname
+topic = "hello/group1"  # Topic to subscribe to
 
 # Callback function for when a message is received
 def on_message(client, userdata, msg):

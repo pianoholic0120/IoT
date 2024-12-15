@@ -1,11 +1,11 @@
 import paho.mqtt.client as mqtt
 
 # MQTT settings
-broker_address = "localhost"  # Replace with broker's IP or hostname
-topic = "air_quality/latest"  # Topic to publish to
+broker_address = "172.20.10.2"  # Replace with broker's IP or hostname
+topic = "hello/group1"  # Topic to publish to
 
 # File containing air quality data (replace with actual file path)
-file_path = "air_quality_data.txt"  # File with air quality data (e.g., CSV or plain text)
+file_path = "./air_quality/combined.csv"  # File with air quality data (e.g., CSV or plain text)
 
 # Function to read the last line of a file
 def read_last_line(file_path):
