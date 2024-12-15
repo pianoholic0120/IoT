@@ -1,5 +1,6 @@
 import numpy  as np 
 import solver
+import math as m
 from datetime import datetime
 def heartrate_preprocessor(heartrate, time):
     heartrate = heartrate.astype(float)
@@ -67,18 +68,19 @@ def matrix_processor(heartrate, air):
     data_mat = np.zeros((2,0))
     j = 0
     for i in range(len(averaage[0])):
-        if(averaage[2][i] >= 20 or averaage[2][i] <= 8):
+        if(  averaage[2][i] >= 2 and averaage[2][i] <= 6):
             while(True):
-                if(averaage[2][i] %2 == 0):
+                
                     if(j <= len(averaair[0])-1):
                         #print(i, j)
-                        if(averaair[0][j] == averaage[0][i] and averaair[1][j] == averaage[1][i] and averaair[2][j] == averaage[2][i]):
+                        if(averaair[0][j] == averaage[0][i] and averaair[1][j] == averaage[1][i] and averaair[2][j] == averaage[2][i]-1):
+                            #print("HELLO")
                             if(averaage[3][i] != 0):
                                 data_mat = np.append(data_mat, [[averaage[3][i]], [averaair[3][j]]], axis=1)
                             break
                         else: j += 1
                     if(j >= len(averaair[0])-1): break
-                else: break
+                
     return data_mat
 
 
@@ -88,7 +90,7 @@ time = data[1:,0]
 averaage = heartrate_preprocessor(heartrate, time)
 
 airdata = np.genfromtxt('./air_quality/combined.txt',dtype=str, encoding = 'utf-8' , delimiter = ',', skip_header=1)
-pm = airdata[:,5]
+pm = airdata[:,4]
 #pm = pm.astype(float)
 time = airdata[:,1]
 averaair = air_preprocessor(pm, time)
