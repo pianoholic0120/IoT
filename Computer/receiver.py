@@ -1,24 +1,25 @@
 import paho.mqtt.client as mqtt
 
-# MQTT settings
-broker_address = "172.20.10.2"  # Replace with broker's IP or hostname
-topic = "hello/group1"  # Topic to subscribe to
+broker_address = "192.168.0.197"  
+subscribe_topic = "hello/group1/rpi2pc" 
 
-# Callback function for when a message is received
-def on_message(client, userdata, msg):
-    latest_data = msg.payload.decode("utf-8")
-    print(f"Received latest air quality data: {latest_data}")
+class Receiver:
+    def __init__(self, broker=broker_address, topic=subscribe_topic, on_message_callback=None):
+        self.client = mqtt.Client()
+        self.on_message_callback = on_message_callback
+        self.client.on_connect = self.on_connect
+        self.client.on_message = self.on_message
+        self.client.connect(broker)
+        self.client.subscribe(topic)
 
-# Create MQTT client and set callback
-client = mqtt.Client()
-client.on_message = on_message
+    def on_connect(self, client, userdata, flags, rc):
+        print("Receiver connected to broker with result code:", rc)
 
-# Connect to broker
-client.connect(broker_address)
+    def on_message(self, client, userdata, msg):
+        data = msg.payload.decode("utf-8")
+        print(f"Received message from {msg.topic}: {data}")
+        if self.on_message_callback:
+            self.on_message_callback(data)
 
-# Subscribe to the topic
-client.subscribe(topic)
-
-# Start the MQTT loop
-print("Waiting for latest air quality data...")
-client.loop_forever()
+    def start(self):
+        self.client.loop_forever()
