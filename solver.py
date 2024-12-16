@@ -8,7 +8,7 @@ def Gauss_elim(A, AX):
             B[i, j] = A[i, j]
     for i in range(len(A)):
         BX[i] = AX[i]
-    size = len(AX) 
+    size = len(AX)
         
     for i in range(1, size, 1):
     
@@ -50,22 +50,22 @@ def Linear_LS_Regression(x, y, n):
     
     return a, b
 
-def poly_regress(x, y, order):  
+def poly_regress(x, y, order):
     order=order+1
-    A = np.zeros((order,order)) 
-    SXi = np.zeros(2*order)     
+    A = np.zeros((order,order))
+    SXi = np.zeros(2*order)
     Y = np.zeros(order)
     
-    for i in range(2*order):    
+    for i in range(2*order):
         temp = 0
         for j in range(len(x)):
             temp += x[j] ** i
         SXi[i] = temp
     
-    for i in range(order):      
+    for i in range(order):
         for j in range(order):
             A[i][j] = SXi[i+j]
-    for i in range(order):      
+    for i in range(order):
         temp = 0
         for j in range(len(y)):
             temp += y[j] * (x[j]** i)
