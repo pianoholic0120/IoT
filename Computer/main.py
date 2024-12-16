@@ -5,15 +5,20 @@ from publisher import Publisher
 from receiver import Receiver
 
 DATA_FOLDER = "./air_quality/"
+current_station = "Da'an"  
 
 def handle_message(msg):
-    if msg == "Zhongzheng" or msg == "Nangang":
-        file_path = os.path.join(DATA_FOLDER, f"{msg}.csv")
-        last_line = read_last_line(file_path)
-        if last_line:
-            pub.send_message(last_line)
-        # else:
-        #     pub.send_message("No data")
+    global current_station  
+
+    if msg.isalpha(): 
+        current_station = msg
+        print(f"Updated current station to: {current_station}")
+        return
+
+    if is_number(msg):
+        pm25_value = msg.strip()
+        print(f"Received PM2.5 value: {pm25_value} for station: {current_station}")
+        handle_realtime_data(current_station, pm25_value)
         return
 
     if "," in msg:
@@ -21,26 +26,10 @@ def handle_message(msg):
         if len(parts) == 2:
             station_name = parts[0].strip()
             pm25_value = parts[1].strip()
-            if station_name == "":
-                station_name = "Da'an"
-        else:
-            station_name = ",".join(parts[:-1]).strip() or "Da'an"
-            pm25_value = parts[-1].strip()
-        
-        handle_realtime_data(station_name, pm25_value)
-    else:
-        if is_number(msg):
-            station_name = "Da'an"
-            pm25_value = msg
-            handle_realtime_data(station_name, pm25_value)
-        else:
-            station_name = msg
-            file_path = os.path.join(DATA_FOLDER, f"{station_name}.csv")
-            last_line = read_last_line(file_path)
-            if last_line:
-                pub.send_message(last_line)
-            # else:
-            #     pub.send_message("No data")
+            current_station = station_name if station_name else "Da'an"
+            print(f"Updated station to {current_station} and received PM2.5: {pm25_value}")
+            handle_realtime_data(current_station, pm25_value)
+            return
 
 def handle_realtime_data(station_name, pm25_value):
     if not os.path.exists(DATA_FOLDER):
@@ -57,17 +46,8 @@ def handle_realtime_data(station_name, pm25_value):
             writer.writerow(["Station", "Date", "AQI", "PM2.5"])
         writer.writerow([station_name, now, aqi, pm25_value])
 
+    print(f"Data saved for {station_name}: PM2.5 = {pm25_value}")
     pub.send_message(f"Data for {station_name} updated: {pm25_value}")
-
-def read_last_line(file_path):
-    if not os.path.exists(file_path):
-        return None
-    with open(file_path, "r", encoding="utf-8") as f:
-        lines = f.readlines()
-    if len(lines) > 1:
-        return lines[-1].strip()
-    else:
-        return None
 
 def is_number(s):
     try:
