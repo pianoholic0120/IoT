@@ -1,6 +1,6 @@
 import paho.mqtt.client as mqtt
 
-broker_address = "192.168.0.197"  
+broker_address = "10.47.101.223"  
 publish_topic = "hello/group1/pc2rpi"  
 
 class Publisher:
