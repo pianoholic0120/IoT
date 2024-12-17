@@ -11,7 +11,7 @@ SERIAL_PORT = '/dev/ttyACM0'  # 根據實際情況選擇，通常是 ttyACM0 或
 BAUD_RATE = 9600
 
 # MQTT 設定
-BROKER_ADDRESS = "192.168.0.197"  # 電腦端 MQTT Broker 的 IP
+BROKER_ADDRESS = "10.47.101.223"  # 電腦端 MQTT Broker 的 IP
 TOPIC_SEND = "hello/group1/rpi2pc"  # 上行 Topic：樹莓派傳送給電腦
 TOPIC_RECEIVE = "hello/group1/pc2rpi"  # 下行 Topic：電腦回傳給樹莓派
 
