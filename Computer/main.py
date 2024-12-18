@@ -2,7 +2,7 @@ import os
 import csv
 import paho.mqtt.client as mqtt
 
-BROKER_ADDRESS = "192.168.0.197"
+BROKER_ADDRESS = "10.47.250.117"
 TOPIC_SEND = "hello/group1/pc2rpi"
 TOPIC_RECEIVE = "hello/group1/rpi2pc"
 
