@@ -1,4 +1,6 @@
 #include <SoftwareSerial.h>
+//#include <SeeedOLED.h>
+///#include <Wire.h>
 
 SoftwareSerial BTSerial(0, 1); // Rx, Tx for HC-05
 int measurePin = A0; 
@@ -22,6 +24,12 @@ void setup() {
   BTSerial.begin(9600);
   pinMode(ledPower, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
+  //Wire.begin();
+  //SeeedOled.init();
+  //SeeedOled.clearDisplay();
+  //SeeedOled.setNormalDisplay();
+  //SeeedOled.setPageMode();
+  //SeeedOled.setTextXY(0,0);
 }
 
 void loop() {
@@ -52,7 +60,7 @@ void loop() {
 
   // 若是模式2，Arduino應該偵測PM2.5並上傳給RPi
   // 但實際上PM2.5的上傳應由RPi詢問或定期執行，這裡先每秒讀取一次並上傳(需RPi配合)
-  if (mode=='2') {
+  if (mode=='2'|| mode == '1'|| mode == '3' || mode == '4') {
     measurePM25AndPrint();
   }
 
@@ -64,8 +72,15 @@ void loop() {
     // 模式1: PC回傳站點最後一行資料 -> Arduino需轉發給手機
     // 模式4: PC回傳回歸結果與PM2.5 -> Arduino需轉發給手機
     if (mode=='1' || mode=='4') {
-      BTSerial.println(data); 
+      //data = float(data);
+      data.toFloat();
+      Serial.println(data);
+      BTSerial.print(data); 
     }
+    data.toFloat();
+    
+    //Serial.print(data);
+    
   }
 }
 
