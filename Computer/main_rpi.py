@@ -1,123 +1,92 @@
 import os
 import serial
-import re
 import time
-import threading
-from datetime import datetime
 import paho.mqtt.client as mqtt
+from datetime import datetime
 
-# 串列通訊設定
-SERIAL_PORT = '/dev/ttyACM0'  # 根據實際情況選擇，通常是 ttyACM0 或 ttyUSB0
-BAUD_RATE = 9600
+BROKER_ADDRESS = "192.168.0.197"  
+TOPIC_SEND = "hello/group1/rpi2pc"
+TOPIC_RECEIVE = "hello/group1/pc2rpi"
 
-# MQTT 設定
-BROKER_ADDRESS = "10.47.101.223"  # 電腦端 MQTT Broker 的 IP
-TOPIC_SEND = "hello/group1/rpi2pc"  # 上行 Topic：樹莓派傳送給電腦
-TOPIC_RECEIVE = "hello/group1/pc2rpi"  # 下行 Topic：電腦回傳給樹莓派
-
-# MQTT 客戶端
 client = mqtt.Client()
+ser = None
 
-# 全域變數
-current_station = "Da'an"  # 預設測站名稱
-upload_data = False  # 是否上傳資料
-stop_thread = False  # 控制程式結束的旗標
-
-
-def extract_pm25(data):
-    """從接收到的字串中提取 PM2.5 數值"""
-    match = re.search(r"Dust Density: ([\-\d.]+) ug/m3", data)
-    if match:
-        try:
-            return float(match.group(1))
-        except ValueError:
-            return None
-    return None
-
+current_mode = '0'
+longitude = 0
+user_code = ""
+current_station = "Da'an"
+pm25_buffer = None
+regression_result = None
 
 def on_connect(client, userdata, flags, rc):
-    """MQTT 連接成功的回調函數"""
-    print("Connected to MQTT broker with result code:", rc)
-    client.subscribe(TOPIC_RECEIVE)  # 訂閱電腦端回傳的資料 Topic
-
+    print("RPi: Connected to MQTT broker with result code:", rc)
+    client.subscribe(TOPIC_RECEIVE)
 
 def on_message(client, userdata, msg):
-    """接收電腦端傳回資料的回調函數"""
-    payload = msg.payload.decode("utf-8").strip()
-    print(f"Data received from PC: {payload}")
-
-
-def send_station_name():
-    """發送測站名稱到電腦端"""
-    client.publish(TOPIC_SEND, f"{current_station}")
-    print(f"Sent station name: {current_station} to PC")
-
-
-def upload_pm25_data(ser):
-    """從 Arduino 持續讀取 PM2.5 數據並上傳到電腦端"""
-    global stop_thread
-    while not stop_thread:
-        if upload_data and ser.in_waiting > 0:
-            data = ser.readline().decode('utf-8').strip()
-            pm25 = extract_pm25(data)
-            if pm25 is not None:
-                now = datetime.now().strftime("%Y/%m/%d %H:%M")
-                print(f"[{now}] PM2.5: {pm25:.2f} μg/m³ at {current_station}")
-                client.publish(TOPIC_SEND, f"{pm25:.2f}")
-                print(f"Sent PM2.5 data to PC: {pm25:.2f} μg/m³")
-            else:
-                print("Invalid PM2.5 data format from Arduino.")
-        time.sleep(1)  # 每秒檢查一次串列資料
-
+    payload = msg.payload.decode('utf-8').strip()
+    print("RPi received from PC:", payload)
+    global regression_result, pm25_buffer, current_mode
+    if current_mode=='1':
+        # payload為最後一行站點資料，直接回給Arduino
+        ser.write((payload+"\n").encode('utf-8'))
+    elif current_mode=='3':
+        # 收到回歸計算完成的結果
+        regression_result = payload
+        # 可以直接回傳告訴Arduino已準備好，或等mode='4'時再取得
+    elif current_mode=='4':
+        # PC回傳的回歸結果與PM2.5值
+        ser.write((payload+"\n").encode('utf-8'))
 
 def main():
-    global current_station, upload_data, stop_thread
-    try:
-        # 初始化 MQTT
-        client.on_connect = on_connect
-        client.on_message = on_message
-        client.connect(BROKER_ADDRESS)
-        client.loop_start()
+    global current_mode, longitude, user_code, current_station, regression_result
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.connect(BROKER_ADDRESS)
+    client.loop_start()
 
-        # 初始化串列通訊
-        ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
-        print(f"Connected to {SERIAL_PORT} at {BAUD_RATE} baud.\n")
+    global ser
+    ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+    print("RPi connected to Arduino serial.")
 
-        # 使用者決定是否上傳資料
-        user_input = input("Do you want to upload PM2.5 data? (y/n): ").strip().lower()
-        upload_data = user_input == 'y'
+    while True:
+        if ser.in_waiting > 0:
+            cmd = ser.readline().decode('utf-8').strip()
+            if len(cmd)==4:
+                # 4位數字指令
+                current_mode = cmd[0]
+                last3 = cmd[1:]
+                if current_mode=='1' or current_mode=='2':
+                    longitude = int(last3)
+                    if longitude < 121:
+                        current_station = "Zhongzheng"
+                    else:
+                        current_station = "Nangang"
+                    if current_mode=='1':
+                        # 請求PC提供該站最後一行資料
+                        # 傳指令給PC，例如傳測站名稱
+                        client.publish(TOPIC_SEND, current_station)
+                    # mode 2則是Arduino會一直上傳PM2.5值，RPi接收後上傳給PC
+                elif current_mode=='3' or current_mode=='4':
+                    user_code = "user" + last3
+                    if current_mode=='3':
+                        # 請PC進行回歸計算
+                        client.publish(TOPIC_SEND, f"REGCALC,{user_code}")
+                    elif current_mode=='4':
+                        # 請PC回傳回歸結果與PM2.5值
+                        client.publish(TOPIC_SEND, f"REGRESULT,{user_code}")
 
-        # 輸入測站名稱
-        station_input = input("Please enter the station name (or press Enter to skip): ").strip()
-        if station_input:
-            current_station = station_input
-        print(f"Current station: {current_station}")
-        send_station_name()
+            else:
+                # 非4碼指令，可能是PM2.5值(mode=2時Arduino傳上來)
+                line = cmd
+                # 檢查是否為PM2.5數值
+                try:
+                    pm25 = float(line)
+                    # 上傳給PC儲存
+                    client.publish(TOPIC_SEND, f"{current_station},{pm25}")
+                except ValueError:
+                    pass
 
-        # 啟動 PM2.5 資料上傳執行緒
-        upload_thread = threading.Thread(target=upload_pm25_data, args=(ser,))
-        upload_thread.start()
-
-        # 非阻塞輸入，用來更新測站名稱
-        while True:
-            new_station_input = input("Enter new station name to update (or press Enter to skip): ").strip()
-            if new_station_input:
-                current_station = new_station_input
-                send_station_name()
-                print(f"Station updated to: {current_station}")
-
-    except serial.SerialException as e:
-        print(f"Serial error: {e}")
-    except KeyboardInterrupt:
-        print("Program stopped by user.")
-    finally:
-        stop_thread = True  # 結束執行緒
-        if 'ser' in locals() and ser.is_open:
-            ser.close()
-            print("Serial connection closed.")
-        client.loop_stop()
-        print("MQTT connection closed.")
-
+        time.sleep(0.5)
 
 if __name__ == "__main__":
     main()
