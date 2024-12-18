@@ -57,3 +57,11 @@ this will obtain the data from Arduino and send it to the northbound with the co
 ### 傳輸概述：
 
 首先會用手機利用HC-05透過Arduino發送訊息給樹莓派，格式會是包含四個數字的string，例如：‘1120', '2121', '3002', '4001'，第一個數字代表模式，‘1’表示需從電腦調用對應資料而不會傳遞pm2.5偵測器的資料，'2'表示把Arduino收集到的PM2.5資料傳給樹莓派並請上傳電腦，'3'則是開始進行回歸計算，‘4’則表示rpi要把回歸結果資料傳回給Arduino，並且Arduino要能夠把回傳值傳回給手機（回傳值包含回歸結果數字和PM2.5數值），第一位'1'和'2'後面跟著的三位數字表示東經經度，若小於121則需向電腦調用Zhongzheng站的csv資料，反之則是用Nangang站的資料，而第一位'3'和'4'後面的三個數字則表示使用者代號，也就是要使用第幾個使用者的代號做回歸運算，也因此要使用該使用者的對應csv檔案計算回歸。Rpi需根據收到的Arduino string訊號做不同的任務，依情況適當寫入電腦中對應的檔案或是從電腦提取對應檔案中最後一行的資料等，並且當Arduino 偵測的PM2.5值超過安全值時讓Arduino的LED燈亮起。
+
+### Hint
+
+* be sure to check the ACM port number before running main_rpi.py
+
+    ls /dev/tty*
+
+    
