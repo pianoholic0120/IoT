@@ -2,13 +2,13 @@ import os
 import csv
 import paho.mqtt.client as mqtt
 
-BROKER_ADDRESS = "10.47.250.117"
+BROKER_ADDRESS = "192.168.50.189"
 TOPIC_SEND = "hello/group1/pc2rpi"
 TOPIC_RECEIVE = "hello/group1/rpi2pc"
 
 DATA_FOLDER = "./air_quality/"
-USER_FOLDER = "./users/"
-RESULT_FOLDER = "./users_results/"
+USER_FOLDER = "./air_quality/"
+RESULT_FOLDER = "./air_quality/"
 
 def on_connect(client, userdata, flags, rc):
     print("PC: Connected to MQTT broker:", rc)
